@@ -136,6 +136,52 @@ class WeChat{
         // }
         return data.expires_in > Date.now()
 
+    };
+
+    /**
+     *  用来获取没有过期的access_token
+     * @returns {Promise<any>}
+     */
+    fetchAccessToken(){
+        if (this.access_token && this.expires_in && this.isValidAccessToken(this)){
+            return Promise.resolve({
+                access_token : this.access_token,
+                expires_in : this.expires_in,
+            })
+        }
+        return this.readAccessToken()
+            .then(async res=>{
+            //本地有文件
+            //判断他是否过期
+            if(this.isValidAccessToken(res)){
+                return Promise.resolve(res)
+            }else{
+                //过期了
+                //发送请求获取access_token(getAccessToken)
+                const res= await this.getAccessToken()
+                await this.saveAccessToken(res)
+                // 将请求回来的access_token返回出去
+                return Promise.resolve(res)
+            }
+        })
+            .catch(async err=>{
+            // 本地没有文件
+            // 发送请求获取access_token(getAccessToken), 保存下来
+            const res= await this.getAccessToken()
+            await this.saveAccessToken(res)
+            // 将请求回来的access_token返回出去
+            return Promise.resolve(res)
+        })
+            .then(res=>{
+            //将access_token挂载到this上
+            this.access_token = res.access_token;
+            this.expires_in = res.expires_in;
+            return Promise.resolve(res)
+        })
+
+        .then(res=>{
+            console.log(182,res);
+        })
     }
 }
 
