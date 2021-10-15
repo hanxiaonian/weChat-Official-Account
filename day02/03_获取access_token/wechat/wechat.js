@@ -159,7 +159,6 @@ class WeChat {
                 //本地有文件
                 //判断他是否过期
                 if (this.isValidAccessToken(res)) {
-                    console.log(110);
                     return Promise.resolve(res)
                 } else {
                     //过期了
@@ -168,6 +167,7 @@ class WeChat {
                     await this.saveAccessToken(res)
                     // 将请求回来的access_token返回出去
                     return Promise.resolve(res)
+
                 }
             })
             .catch(async err => {
@@ -178,15 +178,15 @@ class WeChat {
                 // 将请求回来的access_token返回出去
                 return Promise.resolve(res)
             })
-            .then(res => {
+            .then(async res => {
                 //将access_token挂载到this上
                 this.access_token = res.access_token;
                 this.expires_in = res.expires_in;
                 return Promise.resolve(res)
             })
-
-            .then(res => {
+            .then(async res => {
                 console.log('获取的信息', res);
+                return Promise.resolve(res)
             })
     }
     /**
@@ -214,14 +214,10 @@ class WeChat {
      * @returns {Promise<any>}
      */
     delMenu(){
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             try{
                 // 获取access_token
-                const data = await this.fetchAccessToken()
-                this.fetchAccessToken().then(res=>{
-                    console.log('结果res',res);
-                })
-                console.log(77777,data);
+                const data = await this.fetchAccessToken() ;
                 // 定义请求地址
                 const url = `https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=${data.access_token}`
                 // 发送请求
@@ -240,10 +236,10 @@ class WeChat {
     const w = new WeChat();
     //删除之前定义的菜单
     let result = await w.delMenu();
-    console.log(result);
+    console.log('result001---',result);
     // 创建新的菜单
     await w.creatMenu(menu);
-    // console.log('成功了',result);
+    console.log('成功了',result);
  })()
 
 
