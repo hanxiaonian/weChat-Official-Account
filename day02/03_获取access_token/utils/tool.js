@@ -44,8 +44,7 @@ module.exports = {
                 // 获取属性值
                 let value = jsData[key]
                 // 过滤掉空的数据
-                if(Array.isArray(value) && value > 0){
-                    console.log('这里--',value,value > 0)
+                if(Array.isArray(value) && value.length > 0){
                     // 将合法的数据复制到message上
                     message[key] = value[0]
                 }

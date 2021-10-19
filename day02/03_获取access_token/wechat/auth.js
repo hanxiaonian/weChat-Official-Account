@@ -87,8 +87,37 @@ module.exports = () => {
             // 格式化数据
             const message = formatMessage(jsData)
             console.log('message--',message);
+            /*
+            一旦遇到以下情况，微信都会在公众号会话中，向用户下发系统提示“该公众号暂时无法提供服务，请稍后再试”：
+                1、开发者在5秒内未回复任何内容
+                2、开发者回复了异常数据，比如JSON数据等,xml数据中有多余的空格
+            */
+
+            let content = '';
+
+            if(message.MsgType ==='text'){
+                //判断用户发送的消息内容是什么
+                if(message.Content ==='1'){
+                    content = '哒哒哒哒哒哒'
+                }else if(message.Content ==='2'){
+                    content = '中中中中中中'
+                }else if(message.Content.match('爱')){ //半匹配
+                    content = '爱个球'
+                }
+            }
+            let replyMessage = `<xml>
+              <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
+              <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
+              <CreateTime>${Date.now()}</CreateTime>
+              <MsgType><![CDATA[text]]></MsgType>
+              <Content><![CDATA[${content}]]></Content>
+            </xml>`
+
+            //返回响应给服务器
+            res.send(replyMessage)
+
             //如果开发者服务器没有相应，微信服务器会发送三次请求过来
-            res.end('error')
+            res.end('')
         }else{
             res.end('error')
         }
