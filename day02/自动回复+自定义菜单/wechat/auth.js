@@ -6,7 +6,11 @@ const sha1 = require("sha1");
 // 引入config模块
 const config = require('../config')
 //引入tool模块
-const {getUserDataAsync,parseXMLAsync,formatMessage } = require('../utils/tool')
+const {getUserDataAsync, parseXMLAsync, formatMessage} = require('../utils/tool')
+//引入reply模块
+const reply = require('./reply')
+//引入template模块
+const template = require('./template');
 
 module.exports = () => {
     return async (req, res, next) => {
@@ -38,7 +42,7 @@ module.exports = () => {
         // console.log(sha1Str);
 
 
-        if(req.method==='GET'){
+        if (req.method === 'GET') {
             //3. 加密完成就生成了一个signature, 和微信发送过来的进行对比,
             if (sha1Str === signature) {
                 // 如果一样, 说明消息来自微信服务器, 返回完成后石头人给微信服务器
@@ -47,16 +51,16 @@ module.exports = () => {
                 // 如果不一样, 说明不是微信服务器发送的消息, 返回error
                 res.end('error')
             }
-        }else if(req.method==='POST'){
-            if(sha1Str !== signature){
+        } else if (req.method === 'POST') {
+            if (sha1Str !== signature) {
                 //消息不来自于微信服务器
                 res.end('error')
             }
             // console.log(req.query)
-            console.log('-------------------------')
+            console.log('收到消息-------------------------')
             // 接受请求体中的数据,流式数据
             const xmlData = await getUserDataAsync(req);
-            console.log('xmlData-',xmlData);
+            // console.log('xmlData-',xmlData);
             /*
             <xml>
                 <ToUserName><![CDATA[gh_7b7171e7b307]]></ToUserName>        //开发者id
@@ -70,7 +74,7 @@ module.exports = () => {
 
             //将xml数据解析为js对象
             const jsData = await parseXMLAsync(xmlData)
-            console.log('jsData--',jsData);
+            // console.log('jsData--',jsData);
             /*
              {
               xml: {
@@ -86,39 +90,24 @@ module.exports = () => {
 
             // 格式化数据
             const message = formatMessage(jsData)
-            console.log('message--',message);
+            console.log('message--', message);
             /*
             一旦遇到以下情况，微信都会在公众号会话中，向用户下发系统提示“该公众号暂时无法提供服务，请稍后再试”：
                 1、开发者在5秒内未回复任何内容
                 2、开发者回复了异常数据，比如JSON数据等,xml数据中有多余的空格
             */
 
-            let content = '';
+            const options = reply(message)
 
-            if(message.MsgType ==='text'){
-                //判断用户发送的消息内容是什么
-                if(message.Content ==='1'){
-                    content = '哒哒哒哒哒哒'
-                }else if(message.Content ==='2'){
-                    content = '中中中中中中'
-                }else if(message.Content.match('爱')){ //半匹配
-                    content = '爱个球'
-                }
-            }
-            let replyMessage = `<xml>
-              <ToUserName><![CDATA[${message.FromUserName}]]></ToUserName>
-              <FromUserName><![CDATA[${message.ToUserName}]]></FromUserName>
-              <CreateTime>${Date.now()}</CreateTime>
-              <MsgType><![CDATA[text]]></MsgType>
-              <Content><![CDATA[${content}]]></Content>
-            </xml>`
+            //最终回复用户的消息
+            const replyMessage = template(options)
 
             //返回响应给服务器
             res.send(replyMessage)
 
             //如果开发者服务器没有相应，微信服务器会发送三次请求过来
-            res.end('')
-        }else{
+            // res.end('')
+        } else {
             res.end('error')
         }
     }

@@ -10,7 +10,7 @@ module.exports = {
             req
                 .on('data', data => {
                     //当数据传递过来时,会触发当前事件,会将数据注入到回调函数中
-                    console.log(data);
+                    // console.log(data);
                     //读取的数据是buffer,需要将其转化为字符串
                     xmlData += data.toString();
                     // xmlData = data;
@@ -34,17 +34,17 @@ module.exports = {
         }))
 
     },
-    formatMessage(jsData){
+    formatMessage(jsData) {
         let message = {};
         // 获取xml对象
         jsData = jsData.xml;
         // 判断数据是否是一个对象
-        if(typeof jsData === 'object'){
+        if (typeof jsData === 'object') {
             for (let key in jsData) {
                 // 获取属性值
                 let value = jsData[key]
                 // 过滤掉空的数据
-                if(Array.isArray(value) && value.length > 0){
+                if (Array.isArray(value) && value.length > 0) {
                     // 将合法的数据复制到message上
                     message[key] = value[0]
                 }
@@ -53,7 +53,6 @@ module.exports = {
             }
 
         }
-
 
 
         return message

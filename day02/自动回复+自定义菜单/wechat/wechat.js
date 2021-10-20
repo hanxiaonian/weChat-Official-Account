@@ -40,6 +40,7 @@ const {writeFile, readFile} = require("fs");
 
 // 引入menu模块
 const menu = require('./menu')
+
 // 定义类, 获取access_Token
 class WeChat {
     constructor() {
@@ -109,14 +110,21 @@ class WeChat {
         //读取本地文件中的 access_token
         return new Promise(((resolve, reject) => {
             readFile('./accessToken.txt', (err, data) => {
-                if (!err) {
-                    //将json字符串转化为js对象
-                    data = JSON.parse(data);
-                    console.log('文件读取成功');
-                    resolve(data)
-                } else {
+                console.log(111,data);
+                try {
+                    if (!err && data) {
+                        //将json字符串转化为js对象
+                        data = JSON.parse(data);
+                        console.log('文件读取成功');
+                        resolve(data)
+                    } else {
+                        reject('readAccessToken错误', err);
+                    }
+                }catch (e) {
                     reject('readAccessToken错误', err);
+
                 }
+
             })
         }))
     };
@@ -139,6 +147,8 @@ class WeChat {
         //     // 未过期
         //     return true
         // }
+        console.log(11111, data.expires_in, Date.now())
+        console.log(11111, data.expires_in > Date.now())
         return data.expires_in > Date.now()
 
     };
@@ -189,58 +199,65 @@ class WeChat {
                 return Promise.resolve(res)
             })
     }
+
     /**
      * 创建自定义菜单
      * @param menu 菜单配置对象
      * @returns {Promise<unknown>}
      */
     creatMenu(menu) {
+        console.log(88888,menu);
         return new Promise(async (resolve, reject) => {
             try {
                 // 获取access_token
                 const data = await this.fetchAccessToken()
                 // 定义请求
                 const url = `https://api.weixin.qq.com/cgi-bin/menu/create?access_token=${data.access_token}`;
+                console.log(897, data.access_token)
+
                 // 发送请求
                 const result = await rp({method: 'POST', url, json: true, body: menu})
                 resolve(result)
             } catch (err) {
-                console.log('创建菜单出错-',err);
+                reject('创建菜单出错-', err)
+                console.log('创建菜单出错-', err);
             }
         })
     }
+
     /**
      * 删除自定义菜单
      * @returns {Promise<any>}
      */
-    delMenu(){
+    delMenu() {
         return new Promise(async (resolve) => {
-            try{
+            try {
                 // 获取access_token
-                const data = await this.fetchAccessToken() ;
+                const data = await this.fetchAccessToken();
                 // 定义请求地址
                 const url = `https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=${data.access_token}`
                 // 发送请求
                 const result = await rp({method: 'GET', url, json: true})
                 resolve(result)
-            }catch(err){
-                console.log('删除菜单出错-',err);
+            } catch (err) {
+                reject('删除菜单出错-', err)
+                console.log('删除菜单出错-', err);
             }
 
         })
     }
 }
 
-(async ()=>{
+(async () => {
     //模拟测试
     const w = new WeChat();
     //删除之前定义的菜单
     let result = await w.delMenu();
-    console.log('result001---',result);
+    console.log('result001---', result);
     // 创建新的菜单
-    await w.creatMenu(menu);
-    console.log('成功了',result);
- })()
+    result = await w.creatMenu(menu);
+    console.log('成功了', result);
+})()
 
 
 

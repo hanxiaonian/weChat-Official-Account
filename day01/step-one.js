@@ -22,13 +22,13 @@ const app = express();
             如果不一样, 说明不是微信服务器发送的消息, 返回error
  */
 //定义配置对象
-const config ={
-    token : 'djiusdjjfwoei32',
-    appID :  'wxdca81a960e7a76d4',
-    appsecret : 'dd5452fee690879096fd640e18ed5678',
+const config = {
+    token: 'djiusdjjfwoei32',
+    appID: 'wxdca81a960e7a76d4',
+    appsecret: 'dd5452fee690879096fd640e18ed5678',
 }
 //接受处理所有消息
-app.use((req, res, next)=>{
+app.use((req, res, next) => {
     // 微信服务器传来的参数
     console.log(req)
 
@@ -41,7 +41,7 @@ app.use((req, res, next)=>{
           nonce: '2039581380'       //微信的随机数字
         }
     * */
-    const { signature, echostr, timestamp, nonce} = req.query;
+    const {signature, echostr, timestamp, nonce} = req.query;
     const {token} = config;
 
     //1. 将参与微信加密签名的三个参数(timestamp, nonce, token) 按照字典排序并组合在一起形成一个数组
@@ -54,16 +54,16 @@ app.use((req, res, next)=>{
     const sha1Str = sha1(str);
     console.log(sha1Str);
     //3. 加密完成就生成了一个signature, 和微信发送过来的进行对比,
-    if(sha1Str === signature){
+    if (sha1Str === signature) {
         // 如果一样, 说明消息来自微信服务器, 返回完成后石头人给微信服务器
         res.send(echostr)
-    }else{
+    } else {
         // 如果不一样, 说明不是微信服务器发送的消息, 返回error
         res.end('error')
     }
 })
 
 //监听端口号
-app.listen(3000, ()=>{
+app.listen(3000, () => {
     console.log('服务器启动成功~~!');
 })
