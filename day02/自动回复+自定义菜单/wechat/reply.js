@@ -38,7 +38,7 @@ module.exports = message => {
             //用户订阅事件
             content =
                 `人生何处不相逢,日复一日山水重;
-前朝离别去,今朝又相逢;
+前夕离别去,今朝又相逢;
 朝朝暮暮无他愿,唯愿今夕代码通,
 省去我头疼`;
             if (message.EventKey === 'subscribe') {
